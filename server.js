@@ -7,7 +7,7 @@ const app = express();
 
 // ✅ Middleware
 // Δέχεται αιτήματα μόνο από το frontend σου
-const allowedOrigin = 'frontend-production-f361.up.railway.app';
+const allowedOrigin = 'https://frontend-production-f361.up.railway.app';
 app.use(cors({
   origin: allowedOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
