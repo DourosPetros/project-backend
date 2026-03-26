@@ -6,7 +6,21 @@ const initDb = require('./initDb'); // δημιουργεί τον πίνακα 
 const app = express();
 
 // ✅ Middleware
-app.use(cors({ origin: '*' })); // δέχεται αιτήματα από όλα τα URLs
+// Δέχεται αιτήματα μόνο από το frontend σου
+const allowedOrigin = 'https://frontend-production-f361.up.railway.app';
+app.use(cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
+
+// Για preflight requests (OPTIONS)
+app.options('*', cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
 // ✅ Init DB
