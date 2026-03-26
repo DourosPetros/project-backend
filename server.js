@@ -1,19 +1,27 @@
+// server.js
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db');
-const initDb = require('./initDb');
+const pool = require('./db');      // το αρχείο db.js με το mysql2 pool
+const initDb = require('./initDb'); // το αρχείο initDb.js που δημιουργεί τον πίνακα αν δεν υπάρχει
 
 const app = express();
 
 // ✅ Middleware
-app.use(cors());
+// Αν θέλεις να περιορίσεις το frontend μόνο σε localhost, άλλαξε το origin
+app.use(cors({
+  origin: '*' // ή 'http://localhost:3000'
+}));
 app.use(express.json());
 
-// ✅ Init DB
+// ✅ Init DB - δημιουργεί πίνακα αν δεν υπάρχει
 (async () => {
-  await initDb();
+  try {
+    await initDb();
+    console.log('✅ Database initialized successfully');
+  } catch (err) {
+    console.error('❌ DB init error:', err);
+  }
 })();
-
 
 // 📥 POST - Δημιουργία contact
 app.post('/contacts', async (req, res) => {
@@ -29,7 +37,7 @@ app.post('/contacts', async (req, res) => {
       [first_name, last_name, phone]
     );
 
-    console.log('📥 New contact:', { first_name, last_name, phone });
+    console.log('📥 New contact added:', { first_name, last_name, phone });
 
     res.status(201).json({
       message: 'Contact saved',
@@ -42,28 +50,24 @@ app.post('/contacts', async (req, res) => {
   }
 });
 
-
-// 📤 GET - όλα τα contacts (για testing)
+// 📤 GET - όλα τα contacts
 app.get('/contacts', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM contacts');
     res.json(rows);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Fetch error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
-
 
 // 🏠 Health check
 app.get('/', (req, res) => {
   res.send('API is running 🚀');
 });
 
-
 // ▶️ Start server
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
