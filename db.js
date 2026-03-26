@@ -1,3 +1,4 @@
+// db.js
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
@@ -11,6 +12,7 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Προαιρετικά: για έλεγχο σύνδεσης
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
@@ -21,4 +23,4 @@ const testConnection = async () => {
   }
 };
 
-module.exports = { pool, testConnection };
+module.exports = pool; // ✅ μόνο το pool
