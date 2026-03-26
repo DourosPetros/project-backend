@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db');      // mysql2 pool
-const initDb = require('./initDb'); // δημιουργεί τον πίνακα αν δεν υπάρχει
+const pool = require('./db');      
+const initDb = require('./initDb'); 
 
 const app = express();
 
@@ -71,5 +71,5 @@ app.get('/contacts', async (req, res) => {
 app.get('/', (req, res) => res.send('API is running 🚀'));
 
 // ▶️ Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080; // Railway συνήθως χρησιμοποιεί 8080
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
