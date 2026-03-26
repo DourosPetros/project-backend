@@ -2,7 +2,7 @@
 
 ## Αυτόματη Δημιουργία Πινάκων
 
-Το σύστημα ticketing χρειάζεται 3 πίνακες στη MySQL:
+Το σύστημα ticketing χρειάζεται 3 πίνακες στη **PostgreSQL** (για Railway):
 
 ### ✅ Πίνακες που δημιουργούνται:
 
@@ -11,6 +11,28 @@
 3. **ticket_comments** - Σχόλια για κάθε εισιτήριο
 
 ---
+
+## 🚂 Railway Deployment
+
+### Αυτόματη Ρύθμιση
+
+Όταν κάνεις deploy στο Railway:
+
+1. **Railway παρέχει αυτόματα** `DATABASE_URL` για PostgreSQL
+2. Το `initDb.js` τρέχει αυτόματα κατά την εκκίνηση
+3. Δημιουργούνται αυτόματα οι πίνακες με τα σωστά indexes
+
+### Environment Variables στο Railway:
+
+```
+DATABASE_URL=postgresql://username:password@host:port/database
+NODE_ENV=production
+FRONTEND_URL=https://your-frontend-app.railway.app
+```
+
+---
+
+## 🚀 Τοπικό Development
 
 ## 🚀 Πώς να Τρέξετε το Setup
 
@@ -31,7 +53,7 @@ npm start
 ```bash
 npm run seed
 # ή
-npm run init-db
+npm run init-db  # Τρέχει το initDb.js αυτόματα
 ```
 
 ---
@@ -142,7 +164,7 @@ mysql -u root -p -e "CREATE DATABASE ticketing_system;"
 # 1. Εγκατάσταση dependencies
 npm install
 
-# 2. Δημιουργία πινάκων
+# 2. Δημιουργία πινάκων (τρέχει initDb.js αυτόματα)
 npm run init-db
 
 # 3. Εκκίνηση server
@@ -163,7 +185,7 @@ npm run setup && npm start
 
 1. Ενημερώστε το `seed.js` (προσθέστε τη νέα στήλη)
 2. Ενημερώστε και το `initDb.js` για consistency
-3. Τρέξτε `npm run init-db` για ενημέρωση
+3. Τρέξτε `npm run init-db` (τρέχει initDb.js αυτόματα) για ενημέρωση
 
 ---
 

@@ -6,13 +6,12 @@
     "start": "node server.js",
     "seed": "node seed.js",
     "dev": "node server.js",
-    "init-db": "node seed.js",
-    "setup": "npm install && npm run seed"
+    "init-db": "node initDb.js",
+    "setup": "npm install && npm run init-db"
   },
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^4.18.2",
-    "mysql2": "^3.20.0",
     "pg": "^8.11.3"
   }
 }

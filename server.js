@@ -7,7 +7,7 @@ const ticketsRoutes = require('./routes/ticketsRoutes');
 const app = express();
 
 // Middleware CORS για frontend
-const allowedOrigin = process.env.FRONTEND_URL || 'https://frontend-production-f361.up.railway.app';
+const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({
   origin: allowedOrigin,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
