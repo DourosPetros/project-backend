@@ -1,15 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const initDb = require('./initDb'); 
-const contactsRoutes = require('./routes/contactsRoutes'); // νέο routes αρχείο
+const contactsRoutes = require('./routes/contactsRoutes');
+const ticketsRoutes = require('./routes/ticketsRoutes');
 
 const app = express();
 
 // Middleware CORS για frontend
-const allowedOrigin = 'https://frontend-production-f361.up.railway.app';
+const allowedOrigin = process.env.FRONTEND_URL || 'https://frontend-production-f361.up.railway.app';
 app.use(cors({
   origin: allowedOrigin,
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type']
 }));
 
@@ -26,7 +27,8 @@ app.use(express.json());
 })();
 
 // 🔹 Routes
-app.use('/contacts', contactsRoutes); // όλα τα GET/POST για contacts εδώ
+app.use('/contacts', contactsRoutes);
+app.use('/tickets', ticketsRoutes);
 
 // Health check
 app.get('/', (req, res) => res.send('API is running 🚀'));

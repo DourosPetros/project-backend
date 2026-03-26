@@ -1,4 +1,4 @@
-const { pool } = require('./db');
+const pool = require('./db');
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -9,7 +9,8 @@ const initDb = async () => {
     try {
       console.log('⏳ Trying to connect to MySQL...');
 
-      const query = `
+      // Create contacts table
+      const contactsQuery = `
         CREATE TABLE IF NOT EXISTS contacts (
           id INT AUTO_INCREMENT PRIMARY KEY,
           first_name VARCHAR(100) NOT NULL,
@@ -18,9 +19,44 @@ const initDb = async () => {
         );
       `;
 
-      await pool.query(query);
+      // Create tickets table
+      const ticketsQuery = `
+        CREATE TABLE IF NOT EXISTS tickets (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          status ENUM('open', 'in_progress', 'closed', 'on_hold') DEFAULT 'open',
+          priority ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium',
+          assigned_to VARCHAR(100),
+          created_by VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          due_date DATE,
+          category VARCHAR(100),
+          INDEX idx_status (status),
+          INDEX idx_priority (priority),
+          INDEX idx_created_at (created_at)
+        );
+      `;
 
-      console.log('✅ Table "contacts" created successfully (or already exists)');
+      // Create ticket comments table
+      const commentsQuery = `
+        CREATE TABLE IF NOT EXISTS ticket_comments (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          ticket_id INT NOT NULL,
+          comment_text TEXT NOT NULL,
+          created_by VARCHAR(100),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
+          INDEX idx_ticket_id (ticket_id)
+        );
+      `;
+
+      await pool.query(contactsQuery);
+      await pool.query(ticketsQuery);
+      await pool.query(commentsQuery);
+
+      console.log('✅ Database tables created successfully (or already exist)');
       break;
 
     } catch (err) {
