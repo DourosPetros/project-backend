@@ -1,8 +1,12 @@
 const express = require('express');
 const pool = require('./db');
+const initDb = require('./initDb');
 
 const app = express();
 app.use(express.json());
+
+// 👉 Εκκίνηση DB init
+initDb();
 
 app.get('/', async (req, res) => {
   try {
@@ -17,5 +21,5 @@ app.get('/', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
