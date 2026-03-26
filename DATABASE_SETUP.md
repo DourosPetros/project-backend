@@ -2,7 +2,7 @@
 
 ## Αυτόματη Δημιουργία Πινάκων
 
-Το σύστημα ticketing χρειάζεται 3 πίνακες στη **PostgreSQL** (για Railway):
+Το σύστημα ticketing χρειάζεται 3 πίνακες στη **MySQL**:
 
 ### ✅ Πίνακες που δημιουργούνται:
 
@@ -18,14 +18,18 @@
 
 Όταν κάνεις deploy στο Railway:
 
-1. **Railway παρέχει αυτόματα** `DATABASE_URL` για PostgreSQL
+1. **Railway παρέχει αυτόματα** τις MySQL connection variables
 2. Το `initDb.js` τρέχει αυτόματα κατά την εκκίνηση
 3. Δημιουργούνται αυτόματα οι πίνακες με τα σωστά indexes
 
 ### Environment Variables στο Railway:
 
 ```
-DATABASE_URL=postgresql://username:password@host:port/database
+MYSQLHOST=containers-us-west-xxx.railway.app
+MYSQLUSER=root
+MYSQLPASSWORD=your_password
+MYSQLDATABASE=railway
+MYSQLPORT=xxxx
 NODE_ENV=production
 FRONTEND_URL=https://your-frontend-app.railway.app
 ```

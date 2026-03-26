@@ -8,5 +8,17 @@
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "MYSQLHOST": "${{ MYSQLHOST }}",
+        "MYSQLUSER": "${{ MYSQLUSER }}",
+        "MYSQLPASSWORD": "${{ MYSQLPASSWORD }}",
+        "MYSQLDATABASE": "${{ MYSQLDATABASE }}",
+        "MYSQLPORT": "${{ MYSQLPORT }}",
+        "FRONTEND_URL": "${{ FRONTEND_URL }}"
+      }
+    }
   }
 }

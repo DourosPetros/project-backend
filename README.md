@@ -5,7 +5,7 @@
 ### Railway Deployment (Recommended)
 
 1. **Connect to Railway**: Push code to GitHub, connect repo to Railway
-2. **Add PostgreSQL**: Railway dashboard → Add Plugin → PostgreSQL
+2. **Add MySQL**: Railway dashboard → Add Plugin → MySQL
 3. **Auto-deploy**: Railway automatically runs `npm run init-db` and starts server
 4. **Get URL**: Railway provides your backend URL automatically
 
@@ -13,7 +13,7 @@
 
 ```bash
 npm install
-npm run init-db  # Δημιουργεί αυτόματα τις βάσεις PostgreSQL
+npm run init-db  # Δημιουργεί αυτόματα τις βάσεις MySQL
 npm start
 ```
 

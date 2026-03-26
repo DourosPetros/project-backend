@@ -1,19 +1,25 @@
 // db.js
-const { Pool } = require('pg');
+const mysql = require('mysql2/promise');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+const pool = mysql.createPool({
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: process.env.MYSQLPORT,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 // Προαιρετικά: για έλεγχο σύνδεσης
 const testConnection = async () => {
   try {
-    const client = await pool.connect();
-    console.log('✅ Connected to PostgreSQL');
-    client.release();
+    const connection = await pool.getConnection();
+    console.log('✅ Connected to MySQL');
+    connection.release();
   } catch (err) {
-    console.error('❌ PostgreSQL connection failed:', err.message);
+    console.error('❌ MySQL connection failed:', err.code);
   }
 };
 
