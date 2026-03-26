@@ -1,21 +1,17 @@
 const express = require('express');
-const pool = require('./db');
 const initDb = require('./initDb');
+const { testConnection } = require('./db');
 
 const app = express();
 app.use(express.json());
 
-// 👉 Εκκίνηση DB init
-initDb();
+(async () => {
+  await testConnection();
+  await initDb();
+})();
 
-app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ time: result.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error');
-  }
+app.get('/', (req, res) => {
+  res.send('API is running');
 });
 
 const PORT = process.env.PORT || 3000;
