@@ -7,11 +7,11 @@ const ticketsRoutes = require('./routes/ticketsRoutes');
 const app = express();
 
 // Middleware CORS για frontend
-const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({
-  origin: allowedOrigin,
+  origin: true, // Allow all origins for development
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type'],
+  credentials: true
 }));
 
 app.use(express.json());
