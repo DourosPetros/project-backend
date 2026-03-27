@@ -6,11 +6,14 @@ const ticketsRoutes = require('./routes/ticketsRoutes');
 
 const app = express();
 
-// Middleware CORS για frontend
+// ✅ Πιο αυστηρό και ασφαλές CORS για Production
 app.use(cors({
-  origin: true, // Allow all origins for development
+  origin: [
+    'https://frontend-production-f361.up.railway.app', // Το live link σου
+    'http://localhost:3000'                           // Για να μπορείς να δουλεύεις και τοπικά
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
@@ -34,5 +37,8 @@ app.use('/tickets', ticketsRoutes);
 app.get('/', (req, res) => res.send('API is running 🚀'));
 
 // Start server
+// Στη Railway είναι ΚΡΙΣΙΜΟ να χρησιμοποιείς το process.env.PORT
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
