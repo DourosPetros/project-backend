@@ -1,7 +1,39 @@
-// routes/ticketsRoutes.js
 const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // MySQL pool
+
+// ==================== STATS (ΠΡΕΠΕΙ ΝΑ ΕΙΝΑΙ ΠΡΙΝ ΤΟ /:id) ====================
+
+// GET - Στατιστικά tickets
+router.get('/stats/summary', async (req, res) => {
+  try {
+    const [stats] = await pool.query(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
+        SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_count,
+        SUM(CASE WHEN status = 'stuck' THEN 1 ELSE 0 END) as stuck_count,
+        SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed_count,
+        SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END) as urgent_count
+      FROM tickets
+    `);
+    
+    // Επιστροφή των στατιστικών (αν η βάση είναι άδεια, εξασφαλίζουμε ότι θα επιστρέψει 0 αντί για null)
+    const summary = stats[0] || {
+      total: 0,
+      open_count: 0,
+      in_progress_count: 0,
+      stuck_count: 0,
+      closed_count: 0,
+      urgent_count: 0
+    };
+
+    res.json(summary);
+  } catch (err) {
+    console.error('❌ Stats fetch error:', err);
+    res.status(500).json({ error: 'Database error while fetching stats' });
+  }
+});
 
 // ==================== TICKETS CRUD ====================
 
@@ -29,7 +61,7 @@ router.get('/', async (req, res) => {
     const [rows] = await pool.query(query, params);
     res.json(rows);
   } catch (err) {
-    console.error('❌ Fetch error:', err);
+    console.error('❌ Fetch all tickets error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -38,6 +70,12 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Έλεγχος αν το ID είναι αριθμός (προαιρετικό αλλά προτείνεται)
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid ticket ID format' });
+    }
+
     const [rows] = await pool.query(
       'SELECT * FROM tickets WHERE id = ?',
       [id]
@@ -49,7 +87,7 @@ router.get('/:id', async (req, res) => {
 
     const ticket = rows[0];
 
-    // Ανάκτηση σχολίων
+    // Ανάκτηση σχολίων για το συγκεκριμένο ticket
     const [comments] = await pool.query(
       'SELECT * FROM ticket_comments WHERE ticket_id = ? ORDER BY created_at DESC',
       [id]
@@ -57,7 +95,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({ ...ticket, comments });
   } catch (err) {
-    console.error('❌ Fetch error:', err);
+    console.error(`❌ Fetch ticket ${req.params.id} error:`, err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -95,7 +133,6 @@ router.put('/:id', async (req, res) => {
   const { title, description, status, priority, assigned_to, due_date, category } = req.body;
 
   try {
-    // Έλεγχος αν υπάρχει το ticket
     const [rows] = await pool.query('SELECT id FROM tickets WHERE id = ?', [id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Ticket not found' });
@@ -104,34 +141,13 @@ router.put('/:id', async (req, res) => {
     const updates = [];
     const params = [];
 
-    if (title !== undefined) {
-      updates.push('title = ?');
-      params.push(title);
-    }
-    if (description !== undefined) {
-      updates.push('description = ?');
-      params.push(description);
-    }
-    if (status !== undefined) {
-      updates.push('status = ?');
-      params.push(status);
-    }
-    if (priority !== undefined) {
-      updates.push('priority = ?');
-      params.push(priority);
-    }
-    if (assigned_to !== undefined) {
-      updates.push('assigned_to = ?');
-      params.push(assigned_to);
-    }
-    if (due_date !== undefined) {
-      updates.push('due_date = ?');
-      params.push(due_date);
-    }
-    if (category !== undefined) {
-      updates.push('category = ?');
-      params.push(category);
-    }
+    if (title !== undefined) { updates.push('title = ?'); params.push(title); }
+    if (description !== undefined) { updates.push('description = ?'); params.push(description); }
+    if (status !== undefined) { updates.push('status = ?'); params.push(status); }
+    if (priority !== undefined) { updates.push('priority = ?'); params.push(priority); }
+    if (assigned_to !== undefined) { updates.push('assigned_to = ?'); params.push(assigned_to); }
+    if (due_date !== undefined) { updates.push('due_date = ?'); params.push(due_date); }
+    if (category !== undefined) { updates.push('category = ?'); params.push(category); }
 
     if (updates.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
@@ -149,7 +165,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE - Διαγrafή ticket
+// DELETE - Διαγραφή ticket
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -170,7 +186,7 @@ router.delete('/:id', async (req, res) => {
 
 // ==================== COMMENTS ====================
 
-// POST - Προσθήκη σχολίου σε ticket
+// POST - Προσθήκη σχολίου
 router.post('/:id/comments', async (req, res) => {
   const { id } = req.params;
   const { comment_text, created_by } = req.body;
@@ -180,7 +196,6 @@ router.post('/:id/comments', async (req, res) => {
   }
 
   try {
-    // Έλεγχος αν υπάρχει το ticket
     const [ticket] = await pool.query('SELECT id FROM tickets WHERE id = ?', [id]);
     if (ticket.length === 0) {
       return res.status(404).json({ error: 'Ticket not found' });
@@ -191,18 +206,17 @@ router.post('/:id/comments', async (req, res) => {
       [id, comment_text, created_by || 'Anonymous']
     );
 
-    console.log('💬 Comment added to ticket:', { ticket_id: id, comment_id: result.insertId });
     res.status(201).json({ 
       message: 'Comment added successfully',
       comment_id: result.insertId
     });
   } catch (err) {
-    console.error('❌ Insert error:', err);
+    console.error('❌ Add comment error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
-// GET - Σχόλια ticket (ήδη στο /:id route αλλά όπως χρειάζεται)
+// GET - Σχόλια ενός ticket
 router.get('/:id/comments', async (req, res) => {
   try {
     const { id } = req.params;
@@ -212,12 +226,12 @@ router.get('/:id/comments', async (req, res) => {
     );
     res.json(comments);
   } catch (err) {
-    console.error('❌ Fetch error:', err);
+    console.error('❌ Fetch comments error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
-// DELETE - Διαγrafή σχολίου
+// DELETE - Διαγραφή σχολίου (Global route για σχόλια)
 router.delete('/comments/:comment_id', async (req, res) => {
   const { comment_id } = req.params;
 
@@ -228,32 +242,9 @@ router.delete('/comments/:comment_id', async (req, res) => {
       return res.status(404).json({ error: 'Comment not found' });
     }
 
-    console.log('🗑️ Comment deleted:', { comment_id });
     res.json({ message: 'Comment deleted successfully' });
   } catch (err) {
-    console.error('❌ Delete error:', err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-// ==================== STATS ====================
-
-// GET - Στατιστικά tickets
-router.get('/stats/summary', async (req, res) => {
-  try {
-    const [stats] = await pool.query(`
-      SELECT 
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) as open_count,
-        SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress_count,
-        SUM(CASE WHEN status = 'stuck' THEN 1 ELSE 0 END) as stuck_count,
-        SUM(CASE WHEN status = 'closed' THEN 1 ELSE 0 END) as closed_count,
-        SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END) as urgent_count
-      FROM tickets
-    `);
-    res.json(stats[0]);
-  } catch (err) {
-    console.error('❌ Fetch error:', err);
+    console.error('❌ Delete comment error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
