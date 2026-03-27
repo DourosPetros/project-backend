@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // MySQL pool
+const pool = require('../db');
+const { authMiddleware, requireAdmin } = require('../authMiddleware');
 
 // ==================== STATS (ΠΡΕΠΕΙ ΝΑ ΕΙΝΑΙ ΠΡΙΝ ΤΟ /:id) ====================
 
@@ -127,8 +128,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT - Ενημέρωση ticket
-router.put('/:id', async (req, res) => {
+// PUT - Ενημέρωση ticket (admin only)
+router.put('/:id', authMiddleware, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { title, description, status, priority, assigned_to, due_date, category } = req.body;
 
@@ -165,8 +166,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE - Διαγραφή ticket
-router.delete('/:id', async (req, res) => {
+// DELETE - Διαγραφή ticket (admin only)
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -231,8 +232,8 @@ router.get('/:id/comments', async (req, res) => {
   }
 });
 
-// DELETE - Διαγραφή σχολίου (Global route για σχόλια)
-router.delete('/comments/:comment_id', async (req, res) => {
+// DELETE - Διαγραφή σχολίου (admin only)
+router.delete('/comments/:comment_id', authMiddleware, requireAdmin, async (req, res) => {
   const { comment_id } = req.params;
 
   try {

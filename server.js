@@ -3,6 +3,8 @@ const cors = require('cors');
 const initDb = require('./initDb'); 
 const contactsRoutes = require('./routes/contactsRoutes');
 const ticketsRoutes = require('./routes/ticketsRoutes');
+const authRoutes = require('./routes/authRoutes');
+const usersRoutes = require('./routes/usersRoutes');
 
 const app = express();
 
@@ -30,6 +32,8 @@ app.use(express.json());
 })();
 
 // 🔹 Routes
+app.use('/auth', authRoutes);
+app.use('/users', usersRoutes);
 app.use('/contacts', contactsRoutes);
 app.use('/tickets', ticketsRoutes);
 
