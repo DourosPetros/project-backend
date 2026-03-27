@@ -25,7 +25,7 @@ const initDb = async () => {
           id INT AUTO_INCREMENT PRIMARY KEY,
           title VARCHAR(255) NOT NULL,
           description TEXT,
-          status ENUM('open', 'in_progress', 'closed', 'on_hold') DEFAULT 'open',
+          status ENUM('open', 'in_progress', 'stuck', 'closed') DEFAULT 'open',
           priority ENUM('low', 'medium', 'high', 'urgent') DEFAULT 'medium',
           assigned_to VARCHAR(100),
           created_by VARCHAR(100),
